@@ -100,6 +100,8 @@ namespace EdgeBisecter
                     // TODO: UVの移動処理
                     //       面を延伸した平面上への座標移動の射影分UVも移動させる。
                 }
+
+                Utility.Update(Args.Host.Connector, Pmx);
             }
             catch (Exception ex)
             {
