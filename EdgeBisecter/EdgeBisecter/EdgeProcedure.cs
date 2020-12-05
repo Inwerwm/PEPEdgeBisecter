@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace EdgeBisecter
 {
-    class EdgeProcedure
+    static class EdgeProcedure
     {
-        public void Bisect(IPXVertex edgeVertex1, IPXVertex edgeVertex2, float ratio, IPXPmx pmx)
+        public static IEnumerable<IPXVertex> Bisect(IPXVertex edgeVertex1, IPXVertex edgeVertex2, float ratio, IPXPmx pmx)
         {
             try
             {
@@ -27,13 +27,15 @@ namespace EdgeBisecter
                     throw new InvalidOperationException($"構成頂点として選択頂点を含む面を発見できませんでした。{Environment.NewLine}同一面を構成する2点のみ選択してください。");
 
                 // 面を分割
-                var createdItems = faceToBisect.Select(face => (BisectFace(face.Face, edgeVertex1, edgeVertex2, ratio), face.IncludeMaterial));
+                IEnumerable<((IPXFace Face, IPXVertex Vertex) Created, IPXMaterial IncludeMaterial)> createdItems = faceToBisect.Select(face => (BisectFace(face.Face, edgeVertex1, edgeVertex2, ratio), face.IncludeMaterial));
                 // 新規生成された要素をモデルに追加
                 foreach (((IPXFace Face, IPXVertex Vertex) Created, IPXMaterial IncludeMaterial) item in createdItems)
                 {
                     pmx.Vertex.Add(item.Created.Vertex);
                     item.IncludeMaterial.Faces.Add(item.Created.Face);
                 }
+
+                return createdItems.Select(item => item.Created.Vertex);
             }
             catch (Exception)
             {
@@ -88,7 +90,7 @@ namespace EdgeBisecter
         /// <param name="edgeVertex2">分割する辺の頂点2</param>
         /// <param name="ratio">頂点1の荷重</param>
         /// <returns>分割によって新たに生成された面と頂点</returns>
-        private (IPXFace CreatedFace, IPXVertex CreatedVertex) BisectFace(IPXFace targetFace, IPXVertex edgeVertex1, IPXVertex edgeVertex2, float ratio)
+        private static (IPXFace CreatedFace, IPXVertex CreatedVertex) BisectFace(IPXFace targetFace, IPXVertex edgeVertex1, IPXVertex edgeVertex2, float ratio)
         {
             var separateVertex = CreateAverageVertex(new (IPXVertex, float)[] { (edgeVertex1, ratio), (edgeVertex2, 1 - ratio) });
 
@@ -118,7 +120,7 @@ namespace EdgeBisecter
         /// <param name="face">調査する面</param>
         /// <param name="edgeVertices">辺の構成頂点</param>
         /// <returns>面内頂点情報</returns>
-        private (IPXVertex beforeVertex, IPXVertex afterVertex) getEdgeInfo(IPXFace face, IPXVertex edgeVertex1, IPXVertex edgeVertex2)
+        private static (IPXVertex beforeVertex, IPXVertex afterVertex) getEdgeInfo(IPXFace face, IPXVertex edgeVertex1, IPXVertex edgeVertex2)
         {
             // 最初の頂点が外側頂点
             if (face.Vertex1 != edgeVertex1 && face.Vertex1 != edgeVertex2)
