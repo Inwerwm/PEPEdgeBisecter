@@ -109,6 +109,7 @@ namespace EdgeBisecter
             this.buttonGetPositionVertex.TabIndex = 1;
             this.buttonGetPositionVertex.Text = "選択頂点から取得";
             this.buttonGetPositionVertex.UseVisualStyleBackColor = true;
+            this.buttonGetPositionVertex.Click += new System.EventHandler(this.buttonGetPositionVertex_Click);
             // 
             // textBoxPositionVertex
             // 
@@ -117,6 +118,7 @@ namespace EdgeBisecter
             this.textBoxPositionVertex.Name = "textBoxPositionVertex";
             this.textBoxPositionVertex.Size = new System.Drawing.Size(307, 27);
             this.textBoxPositionVertex.TabIndex = 2;
+            this.textBoxPositionVertex.TextChanged += new System.EventHandler(this.PositiveNumberOnlyValidation);
             // 
             // tableLayoutPanelEdgeVertex
             // 
@@ -161,6 +163,7 @@ namespace EdgeBisecter
             this.buttonGetEdgeVertex.TabIndex = 1;
             this.buttonGetEdgeVertex.Text = "選択頂点から取得";
             this.buttonGetEdgeVertex.UseVisualStyleBackColor = true;
+            this.buttonGetEdgeVertex.Click += new System.EventHandler(this.buttonGetEdgeVertex_Click);
             // 
             // textBoxEdgeVertexNum1
             // 
@@ -169,6 +172,7 @@ namespace EdgeBisecter
             this.textBoxEdgeVertexNum1.Name = "textBoxEdgeVertexNum1";
             this.textBoxEdgeVertexNum1.Size = new System.Drawing.Size(157, 27);
             this.textBoxEdgeVertexNum1.TabIndex = 2;
+            this.textBoxEdgeVertexNum1.TextChanged += new System.EventHandler(this.PositiveNumberOnlyValidation);
             // 
             // textBoxEdgeVertexNum2
             // 
@@ -177,6 +181,7 @@ namespace EdgeBisecter
             this.textBoxEdgeVertexNum2.Name = "textBoxEdgeVertexNum2";
             this.textBoxEdgeVertexNum2.Size = new System.Drawing.Size(157, 27);
             this.textBoxEdgeVertexNum2.TabIndex = 2;
+            this.textBoxEdgeVertexNum2.TextChanged += new System.EventHandler(this.PositiveNumberOnlyValidation);
             // 
             // buttonRun
             // 
@@ -188,6 +193,7 @@ namespace EdgeBisecter
             this.buttonRun.TabIndex = 4;
             this.buttonRun.Text = "実行";
             this.buttonRun.UseVisualStyleBackColor = true;
+            this.buttonRun.Click += new System.EventHandler(this.buttonRun_Click);
             // 
             // FormControl
             // 
