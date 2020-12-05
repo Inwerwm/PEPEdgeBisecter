@@ -31,13 +31,14 @@ namespace EdgeBisecter
                 var separateVertex = CreateAverageVertex(new (IPXVertex, float)[] { (edgeVertex1, ratio), (edgeVertex2, 1 - ratio) });
 
                 // 面を分割
-                var createdFaces = faceToBisect.Select(face => (BisectFace(face.Face, edgeVertex1, edgeVertex2, separateVertex), face.IncludeMaterial));
+                var createdFace = faceToBisect.Select(face => (BisectFace(face.Face, edgeVertex1, edgeVertex2, separateVertex), face.IncludeMaterial)).ToArray();
                 
                 // 新規生成された要素をモデルに追加
                 pmx.Vertex.Add(separateVertex);
-                foreach ((IPXFace Face, IPXMaterial IncludeMaterial) item in createdFaces)
+                // foreachだとループ対象コレクション自身への変更扱いになって例外を吐く
+                for (int i = 0; i < createdFace.Length; i++)
                 {
-                    item.IncludeMaterial.Faces.Add(item.Face);
+                    createdFace[i].IncludeMaterial.Faces.Add(createdFace[i].Item1);
                 }
 
                 return separateVertex;
