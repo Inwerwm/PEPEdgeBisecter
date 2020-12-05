@@ -11,7 +11,7 @@ namespace EdgeBisecter
 {
     static class EdgeProcedure
     {
-        public static IEnumerable<IPXVertex> Bisect(IPXVertex edgeVertex1, IPXVertex edgeVertex2, float ratio, IPXPmx pmx)
+        public static IPXVertex Bisect(IPXVertex edgeVertex1, IPXVertex edgeVertex2, float ratio, IPXPmx pmx)
         {
             try
             {
@@ -23,19 +23,24 @@ namespace EdgeBisecter
                     IPXVertex[] vertices = face.Face.ToVertices();
                     return vertices.Contains(edgeVertex1) && vertices.Contains(edgeVertex2);
                 });
+
                 if (faceToBisect.Count() < 1)
                     throw new InvalidOperationException($"構成頂点として選択頂点を含む面を発見できませんでした。{Environment.NewLine}同一面を構成する2点のみ選択してください。");
 
+                // 分割頂点を生成
+                var separateVertex = CreateAverageVertex(new (IPXVertex, float)[] { (edgeVertex1, ratio), (edgeVertex2, 1 - ratio) });
+
                 // 面を分割
-                IEnumerable<((IPXFace Face, IPXVertex Vertex) Created, IPXMaterial IncludeMaterial)> createdItems = faceToBisect.Select(face => (BisectFace(face.Face, edgeVertex1, edgeVertex2, ratio), face.IncludeMaterial));
+                var createdFaces = faceToBisect.Select(face => (BisectFace(face.Face, edgeVertex1, edgeVertex2, separateVertex), face.IncludeMaterial));
+                
                 // 新規生成された要素をモデルに追加
-                foreach (((IPXFace Face, IPXVertex Vertex) Created, IPXMaterial IncludeMaterial) item in createdItems)
+                pmx.Vertex.Add(separateVertex);
+                foreach ((IPXFace Face, IPXMaterial IncludeMaterial) item in createdFaces)
                 {
-                    pmx.Vertex.Add(item.Created.Vertex);
-                    item.IncludeMaterial.Faces.Add(item.Created.Face);
+                    item.IncludeMaterial.Faces.Add(item.Face);
                 }
 
-                return createdItems.Select(item => item.Created.Vertex);
+                return separateVertex;
             }
             catch (Exception)
             {
@@ -43,6 +48,11 @@ namespace EdgeBisecter
             }
         }
 
+        /// <summary>
+        /// パラメータが加重平均で設定された頂点を生成する
+        /// </summary>
+        /// <param name="sourceVertices">平均する頂点コレクション</param>
+        /// <returns>生成頂点</returns>
         private static IPXVertex CreateAverageVertex(IEnumerable<(IPXVertex Vertex, float AverageWeight)> sourceVertices)
         {
             // 平均頂点
@@ -81,18 +91,18 @@ namespace EdgeBisecter
         }
 
         /// <summary>
-        /// <para>面を指定頂点が構成する辺で分割する</para>
-        /// <para>引数の面は構成頂点の1つが新規生成頂点に差し替えられる</para>
-        /// <para>分割によって生成された面と頂点は戻り値になる</para>
+        /// <para>面の指定頂点から構成される辺を分割する</para>
+        /// <para>引数の面は構成頂点の1つが分割用頂点に差し替えられる</para>
+        /// <para>分割によって生成された面は戻り値になる</para>
         /// </summary>
         /// <param name="targetFace">分割対象面</param>
         /// <param name="edgeVertex1">分割する辺の頂点1</param>
         /// <param name="edgeVertex2">分割する辺の頂点2</param>
-        /// <param name="ratio">頂点1の荷重</param>
-        /// <returns>分割によって新たに生成された面と頂点</returns>
-        private static (IPXFace CreatedFace, IPXVertex CreatedVertex) BisectFace(IPXFace targetFace, IPXVertex edgeVertex1, IPXVertex edgeVertex2, float ratio)
+        /// <param name="separateVertex">分割用頂点</param>
+        /// <returns>分割によって新たに生成された面</returns>
+        private static IPXFace BisectFace(IPXFace targetFace, IPXVertex edgeVertex1, IPXVertex edgeVertex2, IPXVertex separateVertex)
         {
-            var separateVertex = CreateAverageVertex(new (IPXVertex, float)[] { (edgeVertex1, ratio), (edgeVertex2, 1 - ratio) });
+            //var separateVertex = CreateAverageVertex(new (IPXVertex, float)[] { (edgeVertex1, ratio), (edgeVertex2, 1 - ratio) });
 
             var newFace = (IPXFace)targetFace.Clone();
             var edge = getEdgeInfo(targetFace, edgeVertex1, edgeVertex2);
@@ -111,7 +121,7 @@ namespace EdgeBisecter
             if (newFace.Vertex3 == edge.beforeVertex)
                 newFace.Vertex3 = separateVertex;
 
-            return (newFace, separateVertex);
+            return newFace;
         }
 
         /// <summary>
