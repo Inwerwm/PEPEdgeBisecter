@@ -77,6 +77,7 @@ namespace EdgeBisecter
                 return;
             }
 
+            Reload();
             IPXVertex edgeVertex1 = Pmx.Vertex[int.Parse(textBoxEdgeVertexNum1.Text)];
             IPXVertex edgeVertex2 = Pmx.Vertex[int.Parse(textBoxEdgeVertexNum2.Text)];
             IPXVertex positionVertex = null;
